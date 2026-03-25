@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 NFC_MUSIC</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-color: rgba(255, 255, 255, 0.08);
+            --text-color: #ffffff;
+            --sub-color: #999;
+            --accent-color: #1DB954;
+            --record-size: 280px;
+            --progress-bg: #333;
+        }
+
+        [theme="light"] {
+            --bg-color: #e0e0e0;
+            --card-color: rgba(255, 255, 255, 0.7);
+            --text-color: #333;
+            --sub-color: #666;
+            --accent-color: #1ED760;
+            --progress-bg: #ccc;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .player-card {
+            background: var(--card-color);
+            backdrop-filter: blur(20px);
+            padding: 50px 20px 40px;
+            border-radius: 40px;
+            text-align: center;
+            width: 350px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 25px; right: 25px;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            color: var(--text-color); border: none;
+            font-size: 16px; cursor: pointer;
+            z-index: 30;
+        }
+
+        .info h2 { margin-bottom: 6px; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+        .info p { color: var(--sub-color); font-size: 0.95rem; margin-bottom: 35px; }
+
+        /* 唱片机容器 */
+        .record-container {
+            position: relative;
+            width: var(--record-size);
+            height: var(--record-size);
+            margin: 0 auto 45px;
+        }
+
+        /* 升级版唱片针 */
+        .needle {
+            position: absolute;
+            top: -30px;
+            right: 45px;
+            width: 100px;
+            height: 140px;
+            z-index: 20;
+            transform-origin: 20px 20px;
+            transform: rotate(-35deg);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        /* 针轴 */
+        .needle::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 40px; height: 40px;
+            background: radial-gradient(circle, #ddd 0%, #777 100%);
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            z-index: 2;
+        }
+
+        /* 针臂 */
+        .needle-arm {
+            position: absolute;
+            top: 15px; left: 15px;
+            width: 6px; height: 100px;
+            background: linear-gradient(to right, #999, #ccc, #999);
+            border-radius: 3px;
+            transform: rotate(-15deg);
+        }
+
+        /* 针头 */
+        .needle-head {
+            position: absolute;
+            bottom: -5px; right: -25px;
+            width: 12px; height: 24px;
+            background: #333;
+            transform: rotate(30deg);
+            border-radius: 2px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* 质感胶片 */
+        .record {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: #000;
+            /* 模拟黑胶纹路 */
+            background-image: repeating-radial-gradient(
+                rgba(255,255,255,0.05) 0px, 
+                rgba(255,255,255,0.05) 1px, 
+                transparent 1px, 
+                transparent 4px
+            );
+            border: 12px solid #181818;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 0 10px rgba(255,255,255,0.02), 0 20px 40px rgba(0,0,0,0.5);
+            animation: rotate 15s linear infinite;
+            animation-play-state: paused;
+            position: relative;
+        }
+
+        .record::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+        }
+
+        .cover {
+            width: 35%; height: 35%;
+            border-radius: 50%;
+            background-image: url('cover.jpg');
+            background-size: cover;
+            background-position: center;
+            border: 3px solid #000;
+            z-index: 1;
+            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .playing .record { animation-play-state: running; }
+        .playing .needle { transform: rotate(-5deg); }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 进度条样式 */
+        .progress-container { width: 90%; margin: 0 auto 30px; }
+        .progress-bar {
+            -webkit-appearance: none;
+            width: 100%; height: 4px;
+            border-radius: 2px;
+            background: var(--progress-bg);
+            outline: none; cursor: pointer;
+        }
+        .progress-bar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .time {
+            display: flex; justify-content: space-between;
+            color: var(--sub-color); font-size: 0.7rem; margin-top: 8px; font-weight: 500;
+        }
+
+        .btn {
+            background: var(--accent-color);
+            color: #fff; border: none;
+            padding: 16px 0; border-radius: 35px;
+            font-size: 1rem; font-weight: 700;
+            cursor: pointer; transition: all 0.3s;
+            width: 80%;
+            box-shadow: 0 10px 20px rgba(29, 185, 84, 0.2);
+        }
+        .btn:active { transform: scale(0.95); opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<div class="player-card" id="main-card">
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☀️</button>
+
+    <div class="info">
+        <h2 id="title">BAN</h2>
+        <p id="artist">櫻坂46</p>
+    </div>
+
+    <div class="record-container">
+        <div class="needle">
+            <div class="needle-arm">
+                <div class="needle-head"></div>
+            </div>
+        </div>
+        <div class="record">
+            <div class="cover"></div>
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <input type="range" id="progress" class="progress-bar" value="0" min="0" max="100">
+        <div class="time">
+            <span id="current">0:00</span>
+            <span id="total">0:00</span>
+        </div>
+    </div>
+
+    <audio id="music" src="./music.mp3" preload="auto" loop></audio>
+    <button class="btn" onclick="togglePlay()" id="btn-text">正在尝试预载...</button>
+</div>
+
+<script>
+    // JS 部分逻辑保持不变，确保稳健性
+    const card = document.getElementById('main-card');
+    const audio = document.getElementById('music');
+    const btn = document.getElementById('btn-text');
+    const progress = document.getElementById('progress');
+    const currentTimeEl = document.getElementById('current');
+    const totalTimeEl = document.getElementById('total');
+    const themeBtn = document.getElementById('theme-btn');
+
+    audio.addEventListener('loadedmetadata', () => {
+        totalTimeEl.innerText = formatTime(audio.duration);
+        if (btn.innerText === "正在尝试预载...") btn.innerText = "开启音乐";
+    });
+
+    audio.addEventListener('waiting', () => {
+        if (!audio.paused) btn.innerText = "缓冲中...";
+    });
+
+    audio.addEventListener('canplay', () => {
+        if (!audio.paused) btn.innerText = "暂停";
+    });
+
+    function togglePlay() {
+        if (audio.paused) {
+            btn.innerText = "正在唤醒...";
+            audio.play().then(() => {
+                card.classList.add('playing');
+                btn.innerText = "暂停";
+                btn.style.background = "#333";
+            }).catch(e => {
+                btn.innerText = "点击重试";
+            });
+        } else {
+            audio.pause();
+            card.classList.remove('playing');
+            btn.innerText = "继续播放";
+            btn.style.background = "var(--accent-color)";
+        }
+    }
+
+    function toggleTheme() {
+        const current = document.body.getAttribute('theme') || 'dark';
+        if (current === 'dark') {
+            document.body.setAttribute('theme', 'light');
+            themeBtn.innerText = '🌙';
+        } else {
+            document.body.setAttribute('theme', 'dark');
+            themeBtn.innerText = '☀️';
+        }
+    }
+
+    audio.addEventListener('timeupdate', () => {
+        if (!isNaN(audio.duration)) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progress.value = percent;
+            currentTimeEl.innerText = formatTime(audio.currentTime);
+        }
+    });
+
+    progress.addEventListener('input', () => {
+        const seekTime = (progress.value * audio.duration) / 100;
+        audio.currentTime = seekTime;
+    });
+
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+        const min = Math.floor(seconds / 60);
+        const sec = Math.floor(seconds % 60);
+        return `${min}:${sec < 10 ? '0' + sec : sec}`;
+    }
+
+    document.addEventListener('touchstart', () => {
+        if (audio.readyState === 0) audio.load();
+    }, { once: true });
+</script>
+
+</body>
+</html>
