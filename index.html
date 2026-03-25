@@ -6,22 +6,22 @@
     <title>🎵 NFC_MUSIC</title>
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --card-color: rgba(255, 255, 255, 0.08);
+            --bg-color: #121212; /* 更深的背景，突出质感 */
+            --card-color: rgba(255, 255, 255, 0.05);
             --text-color: #ffffff;
-            --sub-color: #999;
-            --accent-color: #1DB954;
+            --sub-color: #aaaaaa;
+            --accent-color: #1DB954; /* 经典 Spotify 绿 */
             --record-size: 280px;
             --progress-bg: #333;
         }
 
         [theme="light"] {
-            --bg-color: #e0e0e0;
-            --card-color: rgba(255, 255, 255, 0.7);
-            --text-color: #333;
+            --bg-color: #f0f0f0;
+            --card-color: rgba(255, 255, 255, 0.9);
+            --text-color: #222;
             --sub-color: #666;
             --accent-color: #1ED760;
-            --progress-bg: #ccc;
+            --progress-bg: #ddd;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -29,7 +29,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: flex; justify-content: center; align-items: center;
             height: 100vh; overflow: hidden;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -37,13 +37,13 @@
 
         .player-card {
             background: var(--card-color);
-            backdrop-filter: blur(20px);
-            padding: 50px 20px 40px;
+            backdrop-filter: blur(25px);
+            padding: 50px 25px 40px;
             border-radius: 40px;
             text-align: center;
             width: 350px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.08);
             position: relative;
         }
 
@@ -52,111 +52,113 @@
             top: 25px; right: 25px;
             width: 36px; height: 36px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.08);
             color: var(--text-color); border: none;
             font-size: 16px; cursor: pointer;
             z-index: 30;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        .info h2 { margin-bottom: 6px; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
-        .info p { color: var(--sub-color); font-size: 0.95rem; margin-bottom: 35px; }
+        .info h2 { margin-bottom: 6px; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.8px; }
+        .info p { color: var(--sub-color); font-size: 1rem; margin-bottom: 35px; font-weight: 500;}
 
         /* 唱片机容器 */
         .record-container {
             position: relative;
             width: var(--record-size);
             height: var(--record-size);
-            margin: 0 auto 45px;
+            margin: 0 auto 50px;
         }
 
-        /* 升级版唱片针 */
+        /* ==================== 极简版唱针 ==================== */
         .needle {
             position: absolute;
-            top: -30px;
-            right: 45px;
+            top: -25px;
+            right: 20px;
             width: 100px;
-            height: 140px;
+            height: 130px;
             z-index: 20;
-            transform-origin: 20px 20px;
-            transform: rotate(-35deg);
+            transform-origin: 50px 15px; /* 旋转中心点在圆盘中心 */
+            transform: rotate(-30deg);
             transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
         }
 
-        /* 针轴 */
-        .needle::before {
-            content: '';
+        /* 简约转轴圆盘 */
+        .needle-pivot {
             position: absolute;
-            top: 0; left: 0;
-            width: 40px; height: 40px;
-            background: radial-gradient(circle, #ddd 0%, #777 100%);
+            top: 0; left: 35px;
+            width: 30px; height: 30px;
+            background: radial-gradient(circle at center, #eee 0%, #aaa 100%); /* 金属拉丝感 */
             border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
             z-index: 2;
         }
 
-        /* 针臂 */
+        /* 极细指针臂 */
         .needle-arm {
             position: absolute;
-            top: 15px; left: 15px;
-            width: 6px; height: 100px;
-            background: linear-gradient(to right, #999, #ccc, #999);
-            border-radius: 3px;
-            transform: rotate(-15deg);
+            top: 15px; left: 48px;
+            width: 2px; height: 100px; /* 极细，强调简约 */
+            background: linear-gradient(to bottom, #999, #ccc 50%, #999);
+            border-radius: 1px;
+            transform: rotate(-12deg);
         }
 
-        /* 针头 */
+        /* 简约针头 */
         .needle-head {
             position: absolute;
-            bottom: -5px; right: -25px;
-            width: 12px; height: 24px;
-            background: #333;
-            transform: rotate(30deg);
-            border-radius: 2px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            bottom: -3px; right: -5px;
+            width: 10px; height: 16px;
+            background: #222;
+            transform: rotate(20deg);
+            border-radius: 1px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
         }
 
-        /* 质感胶片 */
+        /* ==================== 质感胶片 ==================== */
         .record {
             width: 100%; height: 100%;
             border-radius: 50%;
             background: #000;
             /* 模拟黑胶纹路 */
             background-image: repeating-radial-gradient(
-                rgba(255,255,255,0.05) 0px, 
-                rgba(255,255,255,0.05) 1px, 
+                rgba(255,255,255,0.03) 0px, 
+                rgba(255,255,255,0.03) 1px, 
                 transparent 1px, 
-                transparent 4px
+                transparent 3px
             );
-            border: 12px solid #181818;
+            border: 10px solid #1a1a1a;
             display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 0 0 10px rgba(255,255,255,0.02), 0 20px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
             animation: rotate 15s linear infinite;
             animation-play-state: paused;
             position: relative;
         }
 
+        /* 胶片高光 */
         .record::after {
             content: '';
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             border-radius: 50%;
-            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+            background: linear-gradient(135deg, transparent 45%, rgba(255,255,255,0.08) 50%, transparent 55%);
         }
 
+        /* 唱片图案占比更大 */
         .cover {
-            width: 75%; height: 75%;
+            width: 75%; height: 75%; /* 增大占比，让图案更清晰 */
             border-radius: 50%;
             background-image: url('cover.jpg');
             background-size: cover;
             background-position: center;
             border: 3px solid #000;
             z-index: 1;
-            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.8);
         }
 
         .playing .record { animation-play-state: running; }
-        .playing .needle { transform: rotate(-5deg); }
+        .playing .needle { transform: rotate(-3deg); } /* 落针位置调整 */
 
         @keyframes rotate {
             from { transform: rotate(0deg); }
@@ -164,7 +166,7 @@
         }
 
         /* 进度条样式 */
-        .progress-container { width: 90%; margin: 0 auto 30px; }
+        .progress-container { width: 90%; margin: 0 auto 35px; }
         .progress-bar {
             -webkit-appearance: none;
             width: 100%; height: 4px;
@@ -177,12 +179,12 @@
             width: 12px; height: 12px;
             border-radius: 50%;
             background: var(--accent-color);
-            box-shadow: 0 0 10px var(--accent-color);
+            box-shadow: 0 0 8px rgba(29, 185, 84, 0.5);
         }
 
         .time {
             display: flex; justify-content: space-between;
-            color: var(--sub-color); font-size: 0.7rem; margin-top: 8px; font-weight: 500;
+            color: var(--sub-color); font-size: 0.75rem; margin-top: 10px; font-weight: 600; font-variant-numeric: tabular-nums;
         }
 
         .btn {
@@ -190,11 +192,12 @@
             color: #fff; border: none;
             padding: 16px 0; border-radius: 35px;
             font-size: 1rem; font-weight: 700;
-            cursor: pointer; transition: all 0.3s;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             width: 80%;
             box-shadow: 0 10px 20px rgba(29, 185, 84, 0.2);
+            letter-spacing: 0.5px;
         }
-        .btn:active { transform: scale(0.95); opacity: 0.9; }
+        .btn:active { transform: scale(0.96); opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -209,6 +212,7 @@
 
     <div class="record-container">
         <div class="needle">
+            <div class="needle-pivot"></div>
             <div class="needle-arm">
                 <div class="needle-head"></div>
             </div>
@@ -227,11 +231,10 @@
     </div>
 
     <audio id="music" src="./music.mp3" preload="auto" loop></audio>
-    <button class="btn" onclick="togglePlay()" id="btn-text">正在尝试预载...</button>
+    <button class="btn" onclick="togglePlay()" id="btn-text">正在预载...</button>
 </div>
 
 <script>
-    // JS 部分逻辑保持不变，确保稳健性
     const card = document.getElementById('main-card');
     const audio = document.getElementById('music');
     const btn = document.getElementById('btn-text');
@@ -242,7 +245,7 @@
 
     audio.addEventListener('loadedmetadata', () => {
         totalTimeEl.innerText = formatTime(audio.duration);
-        if (btn.innerText === "正在尝试预载...") btn.innerText = "开启音乐";
+        if (btn.innerText === "正在预载...") btn.innerText = "开启音乐";
     });
 
     audio.addEventListener('waiting', () => {
@@ -259,7 +262,7 @@
             audio.play().then(() => {
                 card.classList.add('playing');
                 btn.innerText = "暂停";
-                btn.style.background = "#333";
+                btn.style.background = "#222"; /* 播放时按钮颜色更深，突出暂停图标感 */
             }).catch(e => {
                 btn.innerText = "点击重试";
             });
